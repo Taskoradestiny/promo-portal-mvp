@@ -1,69 +1,11 @@
-import { Activity, CheckCircle2, CreditCard, DollarSign, Users, Wallet } from "lucide-react";
+"use client";
 
-const metrics = [
-  { label: "Total users", value: "24,890", icon: Users },
-  { label: "Wallet volume", value: "₦41.8m", icon: Wallet },
-  { label: "Pending tasks", value: "132", icon: Activity },
-  { label: "Approved deposits", value: "₦18.2m", icon: CreditCard },
-];
+import { useEffect, useState } from "react";
+import { CheckCircle2, CreditCard, Users, Wallet } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
-const pendingApprovals = [
-  { label: "Task submission", user: "Evelyn Carter", detail: "Follow TikTok page" },
-  { label: "Deposit request", user: "John Doe", detail: "₦25,000" },
-  { label: "Withdrawal", user: "Grace Paul", detail: "₦8,500" },
-  { label: "Advertisement", user: "Adebayo Media", detail: "Premium business package" },
-];
-
-export default function AdminPage() {
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <p className="text-sm uppercase tracking-[0.2em] text-brand-300">Administrator dashboard</p>
-        <h1 className="mt-2 text-3xl font-bold text-white">Platform control panel</h1>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {metrics.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-400">{label}</p>
-              <div className="rounded-lg bg-brand-500/10 p-2 text-brand-300"><Icon className="h-4 w-4" /></div>
-            </div>
-            <p className="mt-4 text-2xl font-bold text-white">{value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-10 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
-          <h2 className="text-xl font-semibold text-white">Needs admin approval</h2>
-          <div className="mt-5 space-y-3">
-            {pendingApprovals.map((item) => (
-              <div key={item.user} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/80 p-4">
-                <div>
-                  <p className="font-medium text-white">{item.label}</p>
-                  <p className="text-sm text-slate-400">{item.user}</p>
-                  <p className="text-sm text-brand-300">{item.detail}</p>
-                </div>
-                <button className="rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-2 text-sm font-medium text-brand-200 hover:bg-brand-500/20">
-                  Review
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
-          <h2 className="text-xl font-semibold text-white">Quick admin actions</h2>
-          <div className="mt-5 space-y-3 text-sm">
-            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Create package</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
-            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Add promotional task</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
-            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Approve deposit</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
-            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Approve withdrawal</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
-            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Review advertisement</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export default function AdminPage() { const [admin,setAdmin]=useState(false); const [rows,setRows]=useState<any[]>([]); const [message,setMessage]=useState("");
+  async function load(){ if(!supabase)return; const {data:auth}=await supabase.auth.getUser(); if(!auth.user){setMessage("Please log in as an administrator.");return;} const {data:profile}=await supabase.from("profiles").select("is_admin").eq("id",auth.user.id).single(); if(!profile?.is_admin){setMessage("Administrator access required.");return;} setAdmin(true); const [d,w,t,a]=await Promise.all([supabase.from("deposits").select("id,amount,status,created_at").eq("status","pending").limit(10),supabase.from("withdrawals").select("id,amount,status,created_at").eq("status","pending").limit(10),supabase.from("task_submissions").select("id,status,created_at").eq("status","pending").limit(10),supabase.from("advertisements").select("id,title,status,created_at").eq("status","pending").limit(10)]); setRows([...((d.data||[]).map(x=>({...x,kind:"deposits",label:`Deposit ₦${Number(x.amount).toLocaleString()}`}))),...((w.data||[]).map(x=>({...x,kind:"withdrawals",label:`Withdrawal ₦${Number(x.amount).toLocaleString()}`}))),...((t.data||[]).map(x=>({...x,kind:"task_submissions",label:"Task evidence"}))),...((a.data||[]).map(x=>({...x,kind:"advertisements",label:`Advert: ${x.title}`}))) ]); }
+  useEffect(()=>{load()},[]); async function decide(row:any,status:string){if(!supabase)return; const {error}=await supabase.rpc("record_admin_decision",{p_table:row.kind,p_id:row.id,p_status:status,p_note:null}); if(error)setMessage(error.message);else setRows(old=>old.filter(x=>x.id!==row.id));}
+  return <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8"><div className="mb-8"><p className="text-sm uppercase tracking-[0.2em] text-brand-300">Administrator dashboard</p><h1 className="mt-2 text-3xl font-bold text-white">Platform control panel</h1></div>{message&&<p className="mb-5 text-rose-300">{message}</p>}{admin&&<><div className="grid gap-4 md:grid-cols-3"><div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5"><Users className="text-brand-300"/><p className="mt-3 text-slate-400">Pending actions</p><p className="text-2xl font-bold text-white">{rows.length}</p></div><div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5"><Wallet className="text-brand-300"/><p className="mt-3 text-slate-400">Wallet controls</p><p className="text-2xl font-bold text-white">Active</p></div><div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5"><CreditCard className="text-brand-300"/><p className="mt-3 text-slate-400">Review queue</p><p className="text-2xl font-bold text-white">Live</p></div></div><div className="mt-10 rounded-3xl border border-slate-800 bg-slate-900/80 p-6"><h2 className="text-xl font-semibold text-white">Pending approvals</h2><div className="mt-5 space-y-3">{rows.length?rows.map(row=><div key={`${row.kind}-${row.id}`} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/80 p-4"><div><p className="font-medium text-white">{row.label}</p><p className="text-sm text-slate-400">{new Date(row.created_at).toLocaleString()}</p></div><div className="flex gap-2"><button onClick={()=>decide(row,"rejected")} className="rounded-lg border border-rose-500/30 px-3 py-2 text-sm text-rose-300">Reject</button><button onClick={()=>decide(row,row.kind==="withdrawals"?"approved":"approved")} className="rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-slate-950"><CheckCircle2 className="inline h-4 w-4"/> Approve</button></div></div>):<p className="text-slate-400">No pending approvals.</p>}</div></div></>}</div>;
 }
