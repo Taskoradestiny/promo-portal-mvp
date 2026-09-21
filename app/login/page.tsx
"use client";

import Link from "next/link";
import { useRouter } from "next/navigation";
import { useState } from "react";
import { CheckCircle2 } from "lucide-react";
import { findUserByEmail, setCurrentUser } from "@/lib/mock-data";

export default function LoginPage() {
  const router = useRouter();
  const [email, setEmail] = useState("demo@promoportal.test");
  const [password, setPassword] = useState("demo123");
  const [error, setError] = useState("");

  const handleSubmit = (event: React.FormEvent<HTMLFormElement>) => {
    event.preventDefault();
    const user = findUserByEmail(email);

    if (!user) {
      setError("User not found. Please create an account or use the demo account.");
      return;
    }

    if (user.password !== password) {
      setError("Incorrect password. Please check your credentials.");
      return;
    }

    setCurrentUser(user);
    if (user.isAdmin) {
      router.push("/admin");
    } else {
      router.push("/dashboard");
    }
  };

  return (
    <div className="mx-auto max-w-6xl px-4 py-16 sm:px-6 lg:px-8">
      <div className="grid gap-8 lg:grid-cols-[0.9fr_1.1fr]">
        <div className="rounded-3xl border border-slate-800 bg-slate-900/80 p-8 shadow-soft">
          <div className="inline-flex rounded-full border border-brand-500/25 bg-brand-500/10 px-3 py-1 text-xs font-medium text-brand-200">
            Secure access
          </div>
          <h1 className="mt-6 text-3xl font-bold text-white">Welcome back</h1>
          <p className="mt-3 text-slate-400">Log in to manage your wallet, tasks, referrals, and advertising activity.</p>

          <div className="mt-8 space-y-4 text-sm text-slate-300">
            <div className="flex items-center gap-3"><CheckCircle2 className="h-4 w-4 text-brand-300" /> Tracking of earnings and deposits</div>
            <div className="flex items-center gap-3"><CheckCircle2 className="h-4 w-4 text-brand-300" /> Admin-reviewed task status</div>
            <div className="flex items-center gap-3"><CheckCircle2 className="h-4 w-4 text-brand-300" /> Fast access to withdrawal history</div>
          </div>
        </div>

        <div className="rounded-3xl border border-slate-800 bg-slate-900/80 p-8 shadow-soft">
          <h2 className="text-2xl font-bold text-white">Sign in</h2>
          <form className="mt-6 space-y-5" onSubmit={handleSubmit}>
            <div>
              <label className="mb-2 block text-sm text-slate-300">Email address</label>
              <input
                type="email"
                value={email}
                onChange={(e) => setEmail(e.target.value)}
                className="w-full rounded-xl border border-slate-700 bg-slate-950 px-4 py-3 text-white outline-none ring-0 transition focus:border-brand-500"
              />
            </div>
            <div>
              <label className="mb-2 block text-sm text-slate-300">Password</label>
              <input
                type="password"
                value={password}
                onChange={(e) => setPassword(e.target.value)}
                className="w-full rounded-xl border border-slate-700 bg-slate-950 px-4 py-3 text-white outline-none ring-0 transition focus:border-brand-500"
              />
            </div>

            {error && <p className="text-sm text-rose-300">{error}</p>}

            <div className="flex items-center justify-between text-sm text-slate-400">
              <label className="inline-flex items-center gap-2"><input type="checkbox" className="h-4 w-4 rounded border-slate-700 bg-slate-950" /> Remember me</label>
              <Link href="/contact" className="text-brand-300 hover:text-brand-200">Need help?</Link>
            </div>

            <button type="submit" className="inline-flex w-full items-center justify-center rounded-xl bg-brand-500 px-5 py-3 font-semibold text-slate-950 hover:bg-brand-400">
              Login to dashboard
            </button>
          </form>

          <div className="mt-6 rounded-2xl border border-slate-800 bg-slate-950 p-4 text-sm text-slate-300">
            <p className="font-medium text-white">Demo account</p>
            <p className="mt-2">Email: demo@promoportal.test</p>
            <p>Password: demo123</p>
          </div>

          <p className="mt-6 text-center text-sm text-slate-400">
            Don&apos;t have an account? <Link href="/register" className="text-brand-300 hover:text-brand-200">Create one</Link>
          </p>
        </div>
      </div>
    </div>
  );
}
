@@ -1,0 +1,101 @@
+export type UserProfile = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  referralCode?: string;
+  password: string;
+  bankName: string;
+  bankAccountName: string;
+  bankAccountNumber: string;
+  welcomeBonus: number;
+  isAdmin?: boolean;
+};
+
+export const demoUser: UserProfile = {
+  id: "demo-user",
+  fullName: "Ada Okafor",
+  email: "demo@promoportal.test",
+  phone: "08030000000",
+  referralCode: "AFF-1001",
+  password: "demo123",
+  bankName: "Access Bank",
+  bankAccountName: "Ada Okafor",
+  bankAccountNumber: "0123456789",
+  welcomeBonus: 200,
+  isAdmin: false,
+};
+
+export const demoAdmin: UserProfile = {
+  id: "demo-admin",
+  fullName: "Admin User",
+  email: "admin@promoportal.test",
+  phone: "08011111111",
+  referralCode: "ADMIN",
+  password: "admin123",
+  bankName: "Zenith Bank",
+  bankAccountName: "Admin User",
+  bankAccountNumber: "1234567890",
+  welcomeBonus: 200,
+  isAdmin: true,
+};
+
+export function getStoredUsers(): UserProfile[] {
+  if (typeof window === "undefined") return [demoUser, demoAdmin];
+  const stored = localStorage.getItem("promo_portal_users");
+
+  if (!stored) {
+    localStorage.setItem("promo_portal_users", JSON.stringify([demoUser, demoAdmin]));
+    return [demoUser, demoAdmin];
+  }
+
+  try {
+    return JSON.parse(stored) as UserProfile[];
+  } catch {
+    return [demoUser, demoAdmin];
+  }
+}
+
+export function saveUsers(users: UserProfile[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("promo_portal_users", JSON.stringify(users));
+}
+
+export function upsertUser(user: UserProfile) {
+  const users = getStoredUsers();
+  const index = users.findIndex((item) => item.email === user.email);
+
+  if (index >= 0) {
+    users[index] = user;
+  } else {
+    users.push(user);
+  }
+
+  saveUsers(users);
+}
+
+export function findUserByEmail(email: string) {
+  return getStoredUsers().find((user) => user.email.toLowerCase() === email.toLowerCase());
+}
+
+export function readCurrentUser(): UserProfile | null {
+  if (typeof window === "undefined") return demoUser;
+  const raw = localStorage.getItem("promo_portal_current_user");
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as UserProfile;
+  } catch {
+    return null;
+  }
+}
+
+export function setCurrentUser(user: UserProfile | null) {
+  if (typeof window === "undefined") return;
+  if (!user) {
+    localStorage.removeItem("promo_portal_current_user");
+    return;
+  }
+
+  localStorage.setItem("promo_portal_current_user", JSON.stringify(user));
+}
