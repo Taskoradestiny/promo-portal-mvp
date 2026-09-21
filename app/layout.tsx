@@ -5,7 +5,7 @@ import SiteFooter from "@/components/site-footer";
 
 export const metadata: Metadata = {
   title: "Promo Portal MVP",
-  description: "Starter free MVP for a professional promotional and affiliate platform",
+  description: "Professional starter platform for a digital promotion, referral, and wallet system.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
