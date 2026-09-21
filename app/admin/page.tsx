@@ -1,0 +1,69 @@
+import { Activity, CheckCircle2, CreditCard, DollarSign, Users, Wallet } from "lucide-react";
+
+const metrics = [
+  { label: "Total users", value: "24,890", icon: Users },
+  { label: "Wallet volume", value: "₦41.8m", icon: Wallet },
+  { label: "Pending tasks", value: "132", icon: Activity },
+  { label: "Approved deposits", value: "₦18.2m", icon: CreditCard },
+];
+
+const pendingApprovals = [
+  { label: "Task submission", user: "Evelyn Carter", detail: "Follow TikTok page" },
+  { label: "Deposit request", user: "John Doe", detail: "₦25,000" },
+  { label: "Withdrawal", user: "Grace Paul", detail: "₦8,500" },
+  { label: "Advertisement", user: "Adebayo Media", detail: "Premium business package" },
+];
+
+export default function AdminPage() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <p className="text-sm uppercase tracking-[0.2em] text-brand-300">Administrator dashboard</p>
+        <h1 className="mt-2 text-3xl font-bold text-white">Platform control panel</h1>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {metrics.map(({ label, value, icon: Icon }) => (
+          <div key={label} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-400">{label}</p>
+              <div className="rounded-lg bg-brand-500/10 p-2 text-brand-300"><Icon className="h-4 w-4" /></div>
+            </div>
+            <p className="mt-4 text-2xl font-bold text-white">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-10 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
+          <h2 className="text-xl font-semibold text-white">Needs admin approval</h2>
+          <div className="mt-5 space-y-3">
+            {pendingApprovals.map((item) => (
+              <div key={item.user} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/80 p-4">
+                <div>
+                  <p className="font-medium text-white">{item.label}</p>
+                  <p className="text-sm text-slate-400">{item.user}</p>
+                  <p className="text-sm text-brand-300">{item.detail}</p>
+                </div>
+                <button className="rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-2 text-sm font-medium text-brand-200 hover:bg-brand-500/20">
+                  Review
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
+          <h2 className="text-xl font-semibold text-white">Quick admin actions</h2>
+          <div className="mt-5 space-y-3 text-sm">
+            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Create package</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
+            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Add promotional task</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
+            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Approve deposit</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
+            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Approve withdrawal</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
+            <button className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 hover:border-slate-700"><span>Review advertisement</span><CheckCircle2 className="h-4 w-4 text-brand-300" /></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
